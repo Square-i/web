@@ -1,0 +1,466 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>JavaScript程序设计</title>
+    <style>
+        .image-pic {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .image-pic h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .pic-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .pic-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .pic-item:hover {
+            transform: scale(1.03);
+        }
+        .pic-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        .pic-item p {
+            padding: 10px;
+            text-align: center;
+            background-color: #f9f9f9;
+            margin: 0;
+        }
+        #message-panel {
+            width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+            padding-bottom: 15px;
+        }
+        #message-panel h3 {
+            width: 95%;
+            margin: 15px auto;
+            padding-bottom: 10px;
+            border-bottom: 2px solid red;
+            font-family: "宋体", sans-serif;
+            color: red;
+            font-weight: 900;
+            font-size: 25px;
+        }
+        .message-panel.comment1 {
+            width: 95%;
+            margin: 10px auto;
+            color: #BBBBBB;
+            font-size: 12px;
+            border-bottom: 1px dashed red;
+            font-family: "宋体", sans-serif;
+        }
+        #message-panel .comment1 time {
+            float: right;
+            color: black;
+        }
+        #message-panel .comment1 span {
+            color: #5979B2;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+        #message-panel .comment1 p {
+            font-size: 16px;
+            color: black;
+        }
+        #message-panel #addComment {
+            width: 95%;
+            margin: 0 auto;
+            font-size: 12px;
+            color: #BBBBBB;
+        }
+        #message-panel #name {
+            width: 200px;
+            border: 1px solid #D9E2EF;
+        }
+        #message-panel #comContent {
+            width: 800px;
+            height: 100px;
+            resize: none;
+            border: 1px solid #D9E2EF;
+            vertical-align: text-top;
+        }
+        #message-panel #addComment button {
+            width: 100px;
+            height: 30px;
+            background-color: #2D46A3;
+            color: white;
+            border: hidden;
+            float: right;
+            margin: 15px 100px;
+        }
+        .del {
+            width: 50px;
+            height: 30px;
+            background-color: #2D46A3;
+            color: white;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* 左侧树形菜单样式 */
+        .left-menu {
+            width: 250px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            overflow-y: auto;
+            padding: 10px;
+            border-right: 1px solid #34495e;
+        }
+        .tree-menu {
+            list-style: none;
+        }
+        .tree-menu li {
+            margin: 5px 0;
+            position: relative;
+        }
+        .tree-menu a {
+            color: #ecf0f1;
+            text-decoration: none;
+            display: block;
+            padding: 8px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .tree-menu a:hover {
+            background-color: #34495e;
+        }
+        .tree-menu .has-children>a:after {
+            content: '+';
+            position: absolute;
+            right: 10px;
+        }
+        .tree-menu .has-children.open>a:after {
+            content: '-';
+        }
+        .tree-menu .children {
+            list-style: none;
+            padding-left: 20px;
+            display: none;
+        }
+        .tree-menu .open>.children {
+            display: block;
+        }
+        /* 右侧内容区域样式 */
+        .right-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .content-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        /* 用户信息展示 */
+        .user-info {
+            margin-top: 20px;
+        }
+        .info-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .info-item strong {
+            display: inline-block;
+            width: 100px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧树形菜单 -->
+    <div class="left-menu">
+        <ul class="tree-menu">
+            <li class="has-children">
+                <a href="#">Dashboard</a>
+                <ul class="children">
+                    <li><a href="#" id="image-pic-link">图片</a></li>
+                </ul>
+            </li>
+            <li class="has-children">
+                <a href="#">注册及语言</a>
+                <ul class="children">
+                    <li><a href="#" id="register-link">注册页面</a></li>
+                    <li><a href="#" data-content="java-content">JAVA</a></li>
+                    <li><a href="#" data-content="html-content">html</a></li>
+                </ul>
+            </li>
+            <li class="has-children">
+                <a href="#">开发软件</a>
+                <ul class="children">
+                    <li><a href="#" data-content="j-content">JAVA</a></li>
+                    <li><a href="#" data-content="h-content">html</a></li>
+                </ul>
+            </li>
+            <li class="has-children">
+                <a href="#">异常页</a>
+                <ul class="children">
+                    <li><a href="#" data-content="yichang-content">异常</a></li>
+                </ul>
+            </li>
+            <li><a href="#" id="message-panel-link">留言</a></li>
+    </div>
+    <!-- 右侧内容区域 -->
+    <div class="right-content">
+        <iframe id="content-frame" class="content-frame" src="about:blank"></iframe>
+        <!--留言-->
+        <div id="message-panel" class="message-panel">
+            <h3>全部留言</h3>
+            <div id="comment">
+            </div>
+            <h4>发表留言</h4>
+            <div id="addComment">
+                昵    称：<input type="text" id="name" />
+                <br /><br />
+                留言内容:<textarea id="comContent"></textarea>
+                <button id='tjpl'>发表留言</button>
+            </div>
+        </div>
+        <!--图片-->
+        <div id="image-pic" class="image-pic">
+            <h1>图片展示</h1>
+            <div class="pic-container">
+                <div class="pic-item">
+                    <img src="D:\图片\2befb4fc51c847b1.jpg" alt="示例图片1">
+                    <p>图片展示1</p>
+                </div>
+                <div class="pic-item">
+                    <img src="D:\图片\1582383624094.jpeg" alt="示例图片2">
+                    <p>图片展示2</p>
+                </div>
+                <div class="pic-item">
+                    <img src="D:\图片\img-1673507040350912277b049faa7735caccb6a1e61fe77.jpg" alt="示例图片3">
+                    <p>图片展示3</p>
+                </div>
+                <div class="pic-item">
+                    <img src="D:\图片\mmexport1670974061177.png" alt="示例图片4">
+                    <p>图片展示4</p>
+                </div>
+                <div class="pic-item">
+                    <img src="D:\图片\img-165732660153364f82ffba4f688d961755af0dba5543f0c9af6d3de5ea790ccd781168611d405.jpg"
+                        alt="示例图片5">
+                    <p>图片展示5</p>
+                </div>
+                <div class="pic-item">
+                    <img src="D:\图片\mmexport1684402461829.jpg" alt="示例图片6">
+                    <p>图片展示6</p>
+                </div>
+            </div>
+        </div>
+        <!-- 注册面板 -->
+        <div id="register-panel" class="panel">
+            <h2 class="panel-title">基本设置</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="bio">个人简介</label>
+                    <textarea id="bio" name="bio" placeholder="介绍一下你自己..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-block">注册</button>
+                </div>
+            </form>
+            <!-- 用户信息展示 -->
+            <div id="user-info" class="user-info" style="display: none;">
+                <h3>注册信息</h3>
+                <div id="user-info-content"></div>
+                <div class="form-actions">
+                    <button id="back-to-register" class="btn">返回注册</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function () {
+            // 默认加载欢迎内容
+            loadContent('welcome');
+            // 树形菜单折叠功能
+            document.querySelectorAll('.has-children > a').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    if (this.parentElement.classList.contains('has-children')) {
+                        e.preventDefault();
+                        this.parentElement.classList.toggle('open');
+                    }
+                });
+            });
+            // 菜单项点击加载内容
+            document.querySelectorAll('.tree-menu a[data-content]').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const contentId = this.getAttribute('data-content');
+                    loadContent(contentId);
+                    // 显示iframe，隐藏其他面板
+                    hideAllPanels();
+                    document.getElementById('content-frame').style.display = 'block';
+                });
+            });
+            // 图片展示链接点击事件
+            document.getElementById('image-pic-link').addEventListener('click', function (e) {
+                e.preventDefault();
+                hideAllPanels();
+                document.getElementById('image-pic').style.display = 'block';
+            });
+            // 注册链接点击事件
+            document.getElementById('register-link').addEventListener('click', function (e) {
+                e.preventDefault();
+                hideAllPanels();
+                document.getElementById('register-panel').style.display = 'block';
+                // 确保显示的是表单而不是用户信息
+                document.getElementById('user-info').style.display = 'none';
+                document.querySelector('#register-panel form').style.display = 'block';
+            });
+            // 返回注册按钮点击事件
+            document.getElementById('back-to-register').addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('user-info').style.display = 'none';
+                document.querySelector('#register-panel form').style.display = 'block';
+                // 重置表单
+                document.getElementById('register-form').reset();
+            });
+            // 注册表单提交处理
+            document.getElementById('register-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                // 收集表单数据
+                const formData = {
+                    username: document.getElementById('username').value,
+                    bio: document.getElementById('bio').value,
+                    registerTime: new Date().toLocaleString()
+                };
+                // 显示用户信息
+                displayUserInfo(formData);
+                document.querySelector('#register-panel form').style.display = 'none';
+                document.getElementById('user-info').style.display = 'block';
+            });
+            // 留言面板链接点击事件
+            document.getElementById('message-panel-link').addEventListener('click', function (e) {
+                e.preventDefault();
+                // 隐藏iframe和图片展示，显示留言面板
+                hideAllPanels();
+                document.getElementById('message-panel').style.display = 'block';
+            });
+        });
+        //留言面板功能
+        var comment = document.querySelector('#comment');
+        var ips = document.querySelector('input');
+        var textarea = document.querySelector('textarea');
+        var tjpl = document.getElementById('tjpl')
+        tjpl.onclick = function () {
+            if (ips.value==''||textarea.value=='') {
+                alert("用户名不能为空！");
+                return;
+            }
+            var divs = document.createElement('div');
+            divs.className = 'comment1';
+            divs.innerHTML = '网友昵称:';
+            comment.appendChild(divs);
+            var spans = document.createElement('span');
+            spans.innerHTML = ips.value;
+            divs.appendChild(spans);
+            var time = document.createElement('time');
+            time.innerHTML = new Date().toLocaleString();
+            divs.appendChild(time);
+            var ps = document.createElement('p');
+            ps.innerHTML = textarea.value;
+            divs.appendChild(ps);
+            var del = document.createElement('button');
+            del.className = 'del';
+            del.innerHTML = '删除';
+            divs.appendChild(del);
+            del.onclick = function () {
+                comment.removeChild(this.parentNode);
+            }
+            ips.value = '';
+            textarea.value = '';
+        }
+        // 隐藏所有面板
+        function hideAllPanels() {
+            document.getElementById('content-frame').style.display = 'none';
+            document.getElementById('image-pic').style.display = 'none';
+            document.getElementById('register-panel').style.display = 'none';
+            document.getElementById('message-panel').style.display = 'none';
+        }
+        // 加载内容到iframe
+        function loadContent(contentId) {
+            const frame = document.getElementById('content-frame');
+            let content = '';
+            // 根据不同的内容ID生成不同的内容
+            switch (contentId) {
+                case 'java-content':
+                    content = '<h1>JAVA</h1><p>Java是一门面向对象的编程语言，不仅吸收了C++语言的各种优点，还摒弃了C++里难以理解的多继承、指针等概念，因此Java语言具有功能强大和简单易用两个特征。</p>';
+                    break;
+                case 'html-content':
+                    content = '<h1>html</h1><p>HTML的全称为超文本标记语言，是一种标记语言。它包括一系列标签，通过这些标签可以将网络上的文档格式统一，使分散的Internet资源连接为一个逻辑整体。</p>';
+                    break;
+                case 'j-content':
+                    content = '<h1>JAVA</h1><p>‌JDK‌：Java Development Kit（JDK）是开发Java程序的必备工具，它包含了Java编译器、JVM（Java虚拟机）和其他工具，用于编译和运行Java程序。‌<br/><br/>IDE‌：‌Eclipse‌：这是一个开源的IDE，支持多种编程语言，包括Java。<br/><br/></p>';
+                    break; 
+                case 'h-content':
+                    content = '<h1>html</h1><p>‌Visual Studio Code (VS Code)‌‌<br/><br/>Sublime Text‌‌<br/><br/>Atom‌</p>';
+                    break;
+                case 'yichang-content':
+                    content = '<h1>错误！！！</h1><p>出现异常，请重新选择</p>';
+                    break;
+                default:
+                    content = '<h1>欢迎</h1><p>请从左侧菜单选择内容...</p>';
+            }
+            // 将内容写入iframe
+            frame.srcdoc = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #2c3e50; }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `;
+        }
+        // 显示用户信息
+        function displayUserInfo(data) {
+            const infoContainer = document.getElementById('user-info-content');
+            infoContainer.innerHTML = `
+                <div class="info-item"><strong>用户名:</strong> ${data.username}</div>
+                <div class="info-item"><strong>个人简介:</strong> ${data.bio || '未填写'}</div>
+                <div class="info-item"><strong>注册时间:</strong> ${data.registerTime}</div>
+            `;
+        }
+    </script>
+</body>
+</html>
